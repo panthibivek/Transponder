@@ -52,16 +52,19 @@ class GenData:
         for idx, prompt in enumerate(input_prompts):
             print(f"Current prompt number: {idx}")
             print(f"The prompt: {prompt}")
-            last_tokens_last_hidden_state_tensor, masked_token_index_tensor, masked_token_list, updated_prompt_tensor = self.__generate_row_data(prompt, use_gpu_)
             try:
-                hidden_state_tensor = torch.cat((hidden_state_tensor, last_tokens_last_hidden_state_tensor), dim=0)
-                groundtruth_tensor = torch.cat((groundtruth_tensor, masked_token_index_tensor), dim=0)
+                last_tokens_last_hidden_state_tensor, masked_token_index_tensor, masked_token_list, updated_prompt_tensor = self.__generate_row_data(prompt, use_gpu_)
+                try:
+                    hidden_state_tensor = torch.cat((hidden_state_tensor, last_tokens_last_hidden_state_tensor), dim=0)
+                    groundtruth_tensor = torch.cat((groundtruth_tensor, masked_token_index_tensor), dim=0)
+                except:
+                    hidden_state_tensor = last_tokens_last_hidden_state_tensor
+                    groundtruth_tensor = masked_token_index_tensor
+                groundtruth_token_total_list += masked_token_list
+                prompt_tensor += updated_prompt_tensor
+                print(f"Total samples generated: {len(updated_prompt_tensor)}\n")
             except:
-                hidden_state_tensor = last_tokens_last_hidden_state_tensor
-                groundtruth_tensor = masked_token_index_tensor
-            groundtruth_token_total_list += masked_token_list
-            prompt_tensor += updated_prompt_tensor
-            print(f"Total samples generated: {len(updated_prompt_tensor)}\n")
+                print(f"Prompt skipped!")
 
         output_df = pd.DataFrame({'prompt': prompt_tensor, 'groundtruth_token': groundtruth_token_total_list})
         output_df.to_csv(f"{output_data_path}.csv", index=False)
@@ -72,7 +75,7 @@ class GenData:
         print(f"Total generated samples: {len(prompt_tensor)}")
 
     def __generate_row_data(self, prompt: str, use_gpu_:bool=False):
-        sampling_skip = 3
+        sampling_skip = 2
         masked_token_list = []
         updated_prompt_list = []
         # loop through all tokens
