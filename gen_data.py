@@ -72,7 +72,7 @@ class GenData:
         print(f"Total generated samples: {len(prompt_tensor)}")
 
     def __generate_row_data(self, prompt: str, use_gpu_:bool=False):
-        sampling_skip = 1
+        sampling_skip = 3
         masked_token_list = []
         updated_prompt_list = []
         # loop through all tokens
@@ -80,7 +80,7 @@ class GenData:
         backbone_inputs = self.transponder.tokenizer(prompt, return_tensors="pt")
         samples_from_each_prompt = (int(backbone_inputs['input_ids'].shape[1])-self.PONDER_CONTEXT_LENGTH-1)//sampling_skip
         for idx in range(0, samples_from_each_prompt, 1):
-            if random_gen_bool(0.3):
+            if random_gen_bool(0.1):
                 if int(backbone_inputs['input_ids'].shape[1]) <= 5:
                     break
                 last_token_last_hidden_state, token_index, masked_token = self.__get_hidden_layer(
