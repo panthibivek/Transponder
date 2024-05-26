@@ -1,0 +1,15 @@
+huggingface-hub<1.0,>=0.23.0
+numpy>=1.17
+packaging>=20.0
+pyyaml>=5.1
+regex!=2019.12.17
+requests
+tokenizers<0.20,>=0.19
+safetensors>=0.4.1
+tqdm>=4.27
+fsspec>=2023.5.0
+typing-extensions>=3.7.4.3
+charset-normalizer<4,>=2
+idna<4,>=2.5
+urllib3<3,>=1.21.1
+certifi>=2017.4.17

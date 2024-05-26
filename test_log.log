@@ -1,0 +1,34 @@
+DEBUG:transponder_logger:EOS token id = 2
+DEBUG:transponder_logger:{'input_ids': tensor([[    1,   306,  5360,   432,  3156, 29892,   322]]), 'attention_mask': tensor([[1, 1, 1, 1, 1, 1, 1]])}
+DEBUG:transponder_logger:tokens = tensor([[    1,   306,  5360,   432,  3156, 29892,   322,   306]]) | attn_mask = tensor([[1, 1, 1, 1, 1, 1, 1, 1]]) | decoded_sentence = ['<s> I love jello, and I']
+DEBUG:transponder_logger:tokens = tensor([[    1,   306,  5360,   432,  3156, 29892,   322,   306,  5360]]) | attn_mask = tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1]]) | decoded_sentence = ['<s> I love jello, and I love']
+DEBUG:transponder_logger:tokens = tensor([[    1,   306,  5360,   432,  3156, 29892,   322,   306,  5360,   282]]) | attn_mask = tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]) | decoded_sentence = ['<s> I love jello, and I love p']
+DEBUG:transponder_logger:Pondering on token generated at position 10
+DEBUG:transponder_logger:Ponder head attn_mask = tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1]])
+DEBUG:transponder_logger:tokens = tensor([[    1,   306,  5360,   432,  3156, 29892,   322,   306,  5360, 10857]]) | attn_mask = tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1, 0]]) | decoded_sentence = ['<s> I love jello, and I loveruck']
+DEBUG:transponder_logger:tokens = tensor([[    1,   306,  5360,   432,  3156, 29892,   322,   306,  5360, 10857,
+           793]]) | attn_mask = tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1]]) | decoded_sentence = ['<s> I love jello, and I loveruckles']
+DEBUG:transponder_logger:tokens = tensor([[    1,   306,  5360,   432,  3156, 29892,   322,   306,  5360, 10857,
+           793, 22863]]) | attn_mask = tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1]]) | decoded_sentence = ['<s> I love jello, and I loverucklesbian']
+DEBUG:transponder_logger:Pondering on token generated at position 12
+DEBUG:transponder_logger:Ponder head attn_mask = tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1]])
+DEBUG:transponder_logger:tokens = tensor([[    1,   306,  5360,   432,  3156, 29892,   322,   306,  5360, 10857,
+           793, 20771]]) | attn_mask = tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0]]) | decoded_sentence = ['<s> I love jello, and I loveruckles hav']
+DEBUG:transponder_logger:tokens = tensor([[    1,   306,  5360,   432,  3156, 29892,   322,   306,  5360, 10857,
+           793, 20771, 29881]]) | attn_mask = tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1]]) | decoded_sentence = ['<s> I love jello, and I loveruckles havd']
+DEBUG:transponder_logger:tokens = tensor([[    1,   306,  5360,   432,  3156, 29892,   322,   306,  5360, 10857,
+           793, 20771, 29881, 29889]]) | attn_mask = tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1]]) | decoded_sentence = ['<s> I love jello, and I loveruckles havd.']
+DEBUG:transponder_logger:Pondering on token generated at position 14
+DEBUG:transponder_logger:Ponder head attn_mask = tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1]])
+DEBUG:transponder_logger:tokens = tensor([[    1,   306,  5360,   432,  3156, 29892,   322,   306,  5360, 10857,
+           793, 20771, 29881,  8599]]) | attn_mask = tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0]]) | decoded_sentence = ['<s> I love jello, and I loveruckles havd ию']
+DEBUG:transponder_logger:tokens = tensor([[    1,   306,  5360,   432,  3156, 29892,   322,   306,  5360, 10857,
+           793, 20771, 29881,  8599,   514]]) | attn_mask = tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1]]) | decoded_sentence = ['<s> I love jello, and I loveruckles havd июell']
+DEBUG:transponder_logger:tokens = tensor([[    1,   306,  5360,   432,  3156, 29892,   322,   306,  5360, 10857,
+           793, 20771, 29881,  8599,   514, 29889]]) | attn_mask = tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1]]) | decoded_sentence = ['<s> I love jello, and I loveruckles havd июell.']
+DEBUG:transponder_logger:tokens = tensor([[    1,   306,  5360,   432,  3156, 29892,   322,   306,  5360, 10857,
+           793, 20771, 29881,  8599,   514, 29889,   306]]) | attn_mask = tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1]]) | decoded_sentence = ['<s> I love jello, and I loveruckles havd июell. I']
+DEBUG:transponder_logger:Generated_sentence = ['<s> I love jello, and I loveruckles havd июell. I']
+DEBUG:transponder_logger:EOS token id = 2
+DEBUG:transponder_logger:backbone_inputs = {'input_ids': tensor([[    1,   306,   626, 20492,  2315, 29889]]), 'attention_mask': tensor([[1, 1, 1, 1, 1, 1]])}
+DEBUG:transponder_logger:last_token_last_hidden_state = torch.Size([1, 2048])
