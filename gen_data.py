@@ -66,7 +66,7 @@ class GenData:
         output_df = pd.DataFrame({'prompt': prompt_tensor, 'groundtruth_token': groundtruth_token_total_list})
         output_df.to_csv(f"{output_data_path}.csv", index=False)
         torch.save(hidden_state_tensor, f"{output_data_path}_hidden_state.pt")
-        torch.save(groundtruth_tensor, f"{output_data_path}_groundtruth_one_hot.pt")
+        torch.save(groundtruth_tensor, f"{output_data_path}_groundtruth_index.pt")
         print(f"Combined hidden layer shape: {hidden_state_tensor.shape}")
         print(f"Combined groundtruth one hot tensor shape: {groundtruth_tensor.shape}")
         print(f"Total generated samples: {len(prompt_tensor)}")
