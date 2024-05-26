@@ -32,13 +32,13 @@ class GenData:
             ponder_context_length=self.PONDER_CONTEXT_LENGTH,
         )
 
-    def generate_data(self, input_data_path: str, output_data_path: str):
-        return self.__generate_data(input_data_path, output_data_path)
+    def generate_data(self, input_data_path: str, output_data_path: str, use_gpu_:bool=False):
+        return self.__generate_data(input_data_path, output_data_path, use_gpu_)
     
     def get_hidden_layer(self, prompt: list):
         return self.__get_hidden_layer(prompt)
     
-    def __generate_data(self, input_data_path: str, output_data_path: str):
+    def __generate_data(self, input_data_path: str, output_data_path: str, use_gpu_:bool=False):
         input_df = pd.read_csv(input_data_path)
         result_df = input_df.loc[input_df['correctness'] > 3, 'prompt']
         input_prompts = list(set(result_df.tolist()))
@@ -52,7 +52,7 @@ class GenData:
         for idx, prompt in enumerate(input_prompts):
             print(f"Current prompt number: {idx}")
             print(f"The prompt: {prompt}")
-            last_tokens_last_hidden_state_tensor, masked_token_index_tensor, masked_token_list, updated_prompt_tensor = self.__generate_row_data(prompt)
+            last_tokens_last_hidden_state_tensor, masked_token_index_tensor, masked_token_list, updated_prompt_tensor = self.__generate_row_data(prompt, use_gpu_)
             try:
                 hidden_state_tensor = torch.cat((hidden_state_tensor, last_tokens_last_hidden_state_tensor), dim=0)
                 groundtruth_tensor = torch.cat((groundtruth_tensor, masked_token_index_tensor), dim=0)
@@ -71,7 +71,7 @@ class GenData:
         print(f"Combined groundtruth one hot tensor shape: {groundtruth_tensor.shape}")
         print(f"Total generated samples: {len(prompt_tensor)}")
 
-    def __generate_row_data(self, prompt: str):
+    def __generate_row_data(self, prompt: str, use_gpu_:bool=False):
         sampling_skip = 1
         masked_token_list = []
         updated_prompt_list = []
@@ -85,7 +85,8 @@ class GenData:
                     break
                 last_token_last_hidden_state, token_index, masked_token = self.__get_hidden_layer(
                     prompt = [prompt], 
-                    original_backbone_inputs = backbone_inputs
+                    original_backbone_inputs = backbone_inputs,
+                    use_gpu_ = use_gpu_
                 )
                 try:
                     last_tokens_last_hidden_state_tensor = torch.cat((last_tokens_last_hidden_state_tensor, last_token_last_hidden_state), dim=0)
@@ -105,7 +106,7 @@ class GenData:
         ########
         return last_tokens_last_hidden_state_tensor, masked_token_index_tensor, masked_token_list, updated_prompt_list
 
-    def __get_hidden_layer(self, prompt: list, original_backbone_inputs = None):
+    def __get_hidden_layer(self, prompt: list, original_backbone_inputs = None, use_gpu_:bool=False):
         backbone_inputs = copy.deepcopy(original_backbone_inputs)
         if backbone_inputs is None:
             backbone_inputs = self.transponder.tokenizer(prompt, return_tensors="pt")
@@ -117,9 +118,16 @@ class GenData:
         # masked_token_one_hot_encoding[0][int(backbone_inputs['input_ids'][0][current_token_pos])] = 1
         token_index = torch.tensor([backbone_inputs['input_ids'][0][current_token_pos]])
         self.logger.debug(f"backbone_inputs = {backbone_inputs}")
-        last_token_last_hidden_state = self.transponder.get_last_token_last_hidden_state(
-            **backbone_inputs
-        )
+        if use_gpu_:
+            print(type(backbone_inputs))
+            backbone_inputs = backbone_inputs.to('cuda')
+            last_token_last_hidden_state = self.transponder.get_last_token_last_hidden_state(
+                **backbone_inputs
+            )
+        else:
+            last_token_last_hidden_state = self.transponder.get_last_token_last_hidden_state(
+                **backbone_inputs
+            )
         self.logger.debug(
             f"last_token_last_hidden_state = {last_token_last_hidden_state.shape}"
         )
@@ -151,6 +159,7 @@ if __name__=="__main__":
     gen_obj.generate_data(
         input_data_path=input_data,
         output_data_path=output_data_path
+        # use_gpu_=True
     )
     
     # last_token_last_hidden_state, masked_token = gen_obj.get_hidden_layer(["I am Iron man. Am I made of iron? Wait I think I am."])
