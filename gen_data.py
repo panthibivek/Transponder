@@ -118,9 +118,10 @@ class GenData:
         # masked_token_one_hot_encoding[0][int(backbone_inputs['input_ids'][0][current_token_pos])] = 1
         token_index = torch.tensor([backbone_inputs['input_ids'][0][current_token_pos]])
         self.logger.debug(f"backbone_inputs = {backbone_inputs}")
+
         if use_gpu_:
-            print(type(backbone_inputs))
-            backbone_inputs = backbone_inputs.to('cuda')
+            backbone_inputs['attention_mask'] = backbone_inputs['attention_mask'].to('cuda')
+            backbone_inputs['input_ids'] = backbone_inputs['input_ids'].to('cuda')
             last_token_last_hidden_state = self.transponder.get_last_token_last_hidden_state(
                 **backbone_inputs
             )
@@ -158,7 +159,7 @@ if __name__=="__main__":
     gen_obj = GenData()
     gen_obj.generate_data(
         input_data_path=input_data,
-        output_data_path=output_data_path
+        output_data_path=output_data_path,
         # use_gpu_=True
     )
     
