@@ -64,7 +64,7 @@ class GenData:
         prompt_tensor = []
         for idx, prompt in enumerate(input_prompts):
             print(f"Current prompt number: {idx}")
-            # print(f"The prompt: {prompt}")
+            print(f"The prompt: {prompt}")
             try:
                 last_tokens_last_hidden_state_tensor, masked_token_index_tensor, masked_token_list, updated_prompt_tensor = self.__generate_row_data(prompt, use_gpu_)
                 try:
