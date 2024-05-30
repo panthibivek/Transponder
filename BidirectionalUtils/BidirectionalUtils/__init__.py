@@ -1,0 +1,3 @@
+from .supress_causal_mask import supress_causal_mask_vectorized as supress_causal_masks
+from .supress_causal_mask import get_proper_4_by_4_attn_mask, impose_causal_mask
+from .BidirectionalSwitch import BidirectionalSwitch

@@ -1,5 +1,6 @@
 
-from transponder import Transponder
+
+from decoderOnly.transponder import Transponder
 from utils.SamplingStrategies import GreedySamplingStrategy, TopKSamplingStrategy
 from utils.PonderingCriteria import EntropyPonderingCriteria
 from huggingface_hub import hf_hub_download
