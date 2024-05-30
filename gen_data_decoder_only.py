@@ -1,10 +1,6 @@
 
 
-from transformers import AutoModelForCausalLM, AutoTokenizer
-from abc import ABC, abstractmethod
-from BidirectionalUtils import BidirectionalSwitch
-
-# from decoderOnly.transponder import Transponder
+from decoderOnly.transponder import Transponder
 from utils.SamplingStrategies import GreedySamplingStrategy, TopKSamplingStrategy
 from utils.PonderingCriteria import EntropyPonderingCriteria
 from huggingface_hub import hf_hub_download
@@ -19,22 +15,6 @@ import copy
 import sys
 import os
 
-class LlamaBidirectionalSwitch(BidirectionalSwitch):
-    @property
-    def __backbone(self):
-        return self.llm.model
-
-    def __enter__(self):
-        for transformer_decoder_layer in self.__backbone.layers:
-            transformer_decoder_layer.self_attn.force_bidirectional = True
-
-    def __exit__(self, type, value, traceback):
-        for transformer_decoder_layer in self.__backbone.layers:
-            transformer_decoder_layer.self_attn.force_bidirectional = False
-
-model_checkpoint = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
-model = AutoModelForCausalLM.from_pretrained(model_checkpoint)
-
 class GenData:
     def __init__(self):
         self.logger = logging.getLogger("transponder_logger")
@@ -43,7 +23,15 @@ class GenData:
         self.PONDER_CONTEXT_LENGTH = 5
 
         # mlm_head is not used for generating training data
-        self.tokenizer = AutoTokenizer.from_pretrained(model_checkpoint)
+        self.transponder = Transponder(
+            llm_checkpoint="TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+            mlm_head=None,
+            sampling_strategy=GreedySamplingStrategy(self.LLM_VOCAB_SIZE),
+            pondering_criteria=EntropyPonderingCriteria(
+                threshold=3, vocab_size=self.LLM_VOCAB_SIZE
+            ),
+            ponder_context_length=self.PONDER_CONTEXT_LENGTH,
+        )
 
     def generate_data(self, input_data_path: str, output_data_path: str, use_gpu_:bool=False):
         return self.__generate_data(input_data_path, output_data_path, use_gpu_)
@@ -58,13 +46,13 @@ class GenData:
         input_prompts = input_prompts[:200]
         print(f"Total prompts: {len(input_prompts)}")
         # for dummy 
-        input_prompts = ["I am Iron man. Am I made of iron? Wait, I think I am.", "List the top 10 tallest mountains in the world and list their locations."]
+        # input_prompts = ["I am Iron man. Am I made of iron? Wait, I think I am.", "List the top 10 tallest mountains in the world and list their locations."]
 
         groundtruth_token_total_list = []
         prompt_tensor = []
         for idx, prompt in enumerate(input_prompts):
             print(f"Current prompt number: {idx}")
-            # print(f"The prompt: {prompt}")
+            print(f"The prompt: {prompt}")
             try:
                 last_tokens_last_hidden_state_tensor, masked_token_index_tensor, masked_token_list, updated_prompt_tensor = self.__generate_row_data(prompt, use_gpu_)
                 try:
@@ -93,7 +81,7 @@ class GenData:
         updated_prompt_list = []
         # loop through all tokens
         ########
-        backbone_inputs = self.tokenizer(prompt, return_tensors="pt")
+        backbone_inputs = self.transponder.tokenizer(prompt, return_tensors="pt")
         samples_from_each_prompt = (int(backbone_inputs['input_ids'].shape[1])-self.PONDER_CONTEXT_LENGTH-1)//sampling_skip
         for idx in range(0, samples_from_each_prompt, 1):
             if random_gen_bool(0.1):
@@ -118,18 +106,18 @@ class GenData:
                 'input_ids' : torch.tensor([backbone_inputs['input_ids'][0][:current_token_pos].tolist()]),
                 'attention_mask' : torch.tensor([backbone_inputs['attention_mask'][0][:current_token_pos].tolist()])
                 }
-                prompt = self.tokenizer.batch_decode(backbone_inputs['input_ids'])[0]
+                prompt = self.transponder.tokenizer.batch_decode(backbone_inputs['input_ids'])[0]
         ########
         return last_tokens_last_hidden_state_tensor, masked_token_index_tensor, masked_token_list, updated_prompt_list
 
     def __get_hidden_layer(self, prompt: list, original_backbone_inputs = None, use_gpu_:bool=False):
         backbone_inputs = copy.deepcopy(original_backbone_inputs)
         if backbone_inputs is None:
-            backbone_inputs = self.tokenizer(prompt, return_tensors="pt")
+            backbone_inputs = self.transponder.tokenizer(prompt, return_tensors="pt")
 
         current_token_pos = (backbone_inputs['attention_mask'].shape[1]-1)-self.PONDER_CONTEXT_LENGTH
         (backbone_inputs['attention_mask'])[0][current_token_pos] = 0
-        masked_token = self.tokenizer.batch_decode([[backbone_inputs['input_ids'][0][current_token_pos]]])[0]
+        masked_token = self.transponder.tokenizer.batch_decode([[backbone_inputs['input_ids'][0][current_token_pos]]])[0]
         # masked_token_one_hot_encoding = torch.zeros((1, self.LLM_VOCAB_SIZE))
         # masked_token_one_hot_encoding[0][int(backbone_inputs['input_ids'][0][current_token_pos])] = 1
         token_index = torch.tensor([backbone_inputs['input_ids'][0][current_token_pos]])
@@ -138,21 +126,20 @@ class GenData:
         if use_gpu_:
             backbone_inputs['attention_mask'] = backbone_inputs['attention_mask'].to('cuda')
             backbone_inputs['input_ids'] = backbone_inputs['input_ids'].to('cuda')
-            with LlamaBidirectionalSwitch(model):
-                model_out = model(**backbone_inputs, output_hidden_states=True)
-                last_token_last_hidden_state = model_out.hidden_states[:,current_token_pos,:]
+            last_token_last_hidden_state = self.transponder.get_last_token_last_hidden_state(
+                **backbone_inputs
+            )
         else:
-            with LlamaBidirectionalSwitch(model):
-                model_out = model(**backbone_inputs, output_hidden_states=True)
-                last_token_last_hidden_state = model_out.hidden_states[:,current_token_pos,:]
-
-        print(f"Prompt: {prompt[0]}")
-        print(f"last_token_last_hidden_state: {last_token_last_hidden_state.shape}")
-        print(f"Masked Token: {masked_token}")
-        print(f"Current position: {current_token_pos}")
-        print(f"Backbone input: {backbone_inputs}")
-        print()
-        print()
+            last_token_last_hidden_state = self.transponder.get_last_token_last_hidden_state(
+                **backbone_inputs
+            )
+        self.logger.debug(
+            f"last_token_last_hidden_state = {last_token_last_hidden_state.shape}"
+        )
+        # print(masked_token)
+        # print(current_token_pos)
+        # print(backbone_inputs)
+        # print()
         return last_token_last_hidden_state, token_index, masked_token
     
 
