@@ -2,7 +2,7 @@
 
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from abc import ABC, abstractmethod
-from BidirectionalUtils import BidirectionalSwitch
+from BidirectionalUtils.BidirectionalUtils import BidirectionalSwitch
 
 # from decoderOnly.transponder import Transponder
 from utils.SamplingStrategies import GreedySamplingStrategy, TopKSamplingStrategy
