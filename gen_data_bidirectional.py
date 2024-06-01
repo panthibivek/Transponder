@@ -154,6 +154,7 @@ class GenData:
         print(f"last_token_last_hidden_state: {last_token_last_hidden_state.shape}")
         print(f"Masked Token: {masked_token}")
         print(f"Masked Token idx in vocab: {token_index}")
+        print(f"Masked token reverse (assert): {self.tokenizer.batch_decode([token_index])[0]}")
         print(f"Current position: {current_token_pos}")
         print(f"Backbone input: {backbone_inputs}")
         print()
