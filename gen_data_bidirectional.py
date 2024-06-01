@@ -154,7 +154,7 @@ class GenData:
         print(f"Masked Token: {masked_token}")
         print(f"Current position: {current_token_pos}")
         print(f"Backbone input: {backbone_inputs}")
-        print(self.tokenizer([masked_token], return_tensors="pt", padding=True))
+        print(self.tokenizer([masked_token], return_tensors="pt"))
         print()
         return last_token_last_hidden_state, token_index, masked_token
     
