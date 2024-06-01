@@ -135,6 +135,7 @@ class GenData:
         # masked_token_one_hot_encoding[0][int(backbone_inputs['input_ids'][0][current_token_pos])] = 1
         token_index = torch.tensor([backbone_inputs['input_ids'][0][current_token_pos]])
         self.logger.debug(f"backbone_inputs = {backbone_inputs}")
+        print(current_token_pos)
 
         if use_gpu_:
             backbone_inputs['attention_mask'] = backbone_inputs['attention_mask'].to('cuda')
