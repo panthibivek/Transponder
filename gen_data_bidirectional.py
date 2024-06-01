@@ -97,7 +97,7 @@ class GenData:
         samples_from_each_prompt = (int(backbone_inputs['input_ids'].shape[1])-self.PONDER_CONTEXT_LENGTH-1)//sampling_skip
         for idx in range(0, samples_from_each_prompt, 1):
             # if random_gen_bool(0.1):
-            if random_gen_bool(0.5):
+            if random_gen_bool(0.3):
                 if int(backbone_inputs['input_ids'].shape[1]) <= 5:
                     break
                 last_token_last_hidden_state, token_index, masked_token = self.__get_hidden_layer(
@@ -114,12 +114,12 @@ class GenData:
                 masked_token_list.append(masked_token)
                 updated_prompt_list.append(prompt)
 
-                current_token_pos = backbone_inputs['input_ids'].shape[1]-sampling_skip
-                backbone_inputs = {
-                'input_ids' : torch.tensor([backbone_inputs['input_ids'][0][:current_token_pos].tolist()]),
-                'attention_mask' : torch.tensor([backbone_inputs['attention_mask'][0][:current_token_pos].tolist()])
-                }
-                prompt = self.tokenizer.batch_decode(backbone_inputs['input_ids'])[0]
+            current_token_pos = backbone_inputs['input_ids'].shape[1]-sampling_skip
+            backbone_inputs = {
+            'input_ids' : torch.tensor([backbone_inputs['input_ids'][0][:current_token_pos].tolist()]),
+            'attention_mask' : torch.tensor([backbone_inputs['attention_mask'][0][:current_token_pos].tolist()])
+            }
+            prompt = self.tokenizer.batch_decode(backbone_inputs['input_ids'])[0]
         ########
         return last_tokens_last_hidden_state_tensor, masked_token_index_tensor, masked_token_list, updated_prompt_list
 
