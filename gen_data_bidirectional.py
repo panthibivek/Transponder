@@ -119,7 +119,7 @@ class GenData:
             'input_ids' : torch.tensor([backbone_inputs['input_ids'][0][:current_token_pos].tolist()]),
             'attention_mask' : torch.tensor([backbone_inputs['attention_mask'][0][:current_token_pos].tolist()])
             }
-            prompt = self.tokenizer.batch_decode(backbone_inputs['input_ids'])[0]
+            prompt = self.tokenizer.decode(backbone_inputs['input_ids'])[0]
         ########
         return last_tokens_last_hidden_state_tensor, masked_token_index_tensor, masked_token_list, updated_prompt_list
 
@@ -130,7 +130,7 @@ class GenData:
 
         current_token_pos = (backbone_inputs['attention_mask'].shape[1]-1)-self.PONDER_CONTEXT_LENGTH
         (backbone_inputs['attention_mask'])[0][current_token_pos] = 0
-        masked_token = self.tokenizer.batch_decode([[backbone_inputs['input_ids'][0][current_token_pos]]])[0]
+        masked_token = self.tokenizer.decode([backbone_inputs['input_ids'][0][current_token_pos]])[0]
         # masked_token_one_hot_encoding = torch.zeros((1, self.LLM_VOCAB_SIZE))
         # masked_token_one_hot_encoding[0][int(backbone_inputs['input_ids'][0][current_token_pos])] = 1
         token_index = torch.tensor([backbone_inputs['input_ids'][0][current_token_pos]])
@@ -149,12 +149,13 @@ class GenData:
                 model_out = model(**backbone_inputs, output_hidden_states=True)
                 last_token_last_hidden_state = model_out.hidden_states[-1][:,current_token_pos,:]
 
-        print(f"Prompt: {prompt[0]}")
+        print(f"Prompt: {prompt}")
+        print(f"Returned hidden layers shape: {model_out.hidden_states[-1]}")
         print(f"last_token_last_hidden_state: {last_token_last_hidden_state.shape}")
         print(f"Masked Token: {masked_token}")
+        print(f"Masked Token idx in vocab: {token_index}")
         print(f"Current position: {current_token_pos}")
         print(f"Backbone input: {backbone_inputs}")
-        print(self.tokenizer([masked_token], return_tensors="pt"))
         print()
         return last_token_last_hidden_state, token_index, masked_token
     
