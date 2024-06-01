@@ -119,7 +119,7 @@ class GenData:
             'input_ids' : torch.tensor([backbone_inputs['input_ids'][0][:current_token_pos].tolist()]),
             'attention_mask' : torch.tensor([backbone_inputs['attention_mask'][0][:current_token_pos].tolist()])
             }
-            prompt = self.tokenizer.decode(backbone_inputs['input_ids'])
+            prompt = self.tokenizer.batch_decode(backbone_inputs['input_ids'])[0]
         ########
         return last_tokens_last_hidden_state_tensor, masked_token_index_tensor, masked_token_list, updated_prompt_list
 
@@ -130,7 +130,7 @@ class GenData:
 
         current_token_pos = (backbone_inputs['attention_mask'].shape[1]-1)-self.PONDER_CONTEXT_LENGTH
         (backbone_inputs['attention_mask'])[0][current_token_pos] = 0
-        masked_token = self.tokenizer.decode([backbone_inputs['input_ids'][0][current_token_pos]])
+        masked_token = self.tokenizer.batch_decode([backbone_inputs['input_ids'][0][current_token_pos]])[0]
         # masked_token_one_hot_encoding = torch.zeros((1, self.LLM_VOCAB_SIZE))
         # masked_token_one_hot_encoding[0][int(backbone_inputs['input_ids'][0][current_token_pos])] = 1
         token_index = torch.tensor([backbone_inputs['input_ids'][0][current_token_pos]])
