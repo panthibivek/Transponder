@@ -150,7 +150,7 @@ class GenData:
                 last_token_last_hidden_state = model_out.hidden_states[-1][:,current_token_pos,:]
 
         print(f"Prompt: {prompt}")
-        print(f"Returned hidden layers shape: {model_out.hidden_states[-1]}")
+        print(f"Returned hidden layers shape: {model_out.hidden_states[-1].shape}")
         print(f"last_token_last_hidden_state: {last_token_last_hidden_state.shape}")
         print(f"Masked Token: {masked_token}")
         print(f"Masked Token idx in vocab: {token_index}")
