@@ -135,7 +135,6 @@ class GenData:
         # masked_token_one_hot_encoding[0][int(backbone_inputs['input_ids'][0][current_token_pos])] = 1
         token_index = torch.tensor([backbone_inputs['input_ids'][0][current_token_pos]])
         self.logger.debug(f"backbone_inputs = {backbone_inputs}")
-        print(current_token_pos)
 
         if use_gpu_:
             backbone_inputs['attention_mask'] = backbone_inputs['attention_mask'].to('cuda')
@@ -144,11 +143,11 @@ class GenData:
             model_cuda = model.to('cuda')
             with LlamaBidirectionalSwitch(model_cuda):
                 model_out = model_cuda(**backbone_inputs, output_hidden_states=True)
-                last_token_last_hidden_state = model_out.hidden_states[:,current_token_pos,:]
+                last_token_last_hidden_state = model_out.hidden_states[-1][:,current_token_pos,:]
         else:
             with LlamaBidirectionalSwitch(model):
                 model_out = model(**backbone_inputs, output_hidden_states=True)
-                last_token_last_hidden_state = model_out.hidden_states[:,current_token_pos,:]
+                last_token_last_hidden_state = model_out.hidden_states[-1][:,current_token_pos,:]
 
         print(f"Prompt: {prompt[0]}")
         print(f"last_token_last_hidden_state: {last_token_last_hidden_state.shape}")
