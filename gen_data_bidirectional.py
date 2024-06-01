@@ -139,9 +139,10 @@ class GenData:
         if use_gpu_:
             backbone_inputs['attention_mask'] = backbone_inputs['attention_mask'].to('cuda')
             backbone_inputs['input_ids'] = backbone_inputs['input_ids'].to('cuda')
-            with LlamaBidirectionalSwitch(model):
-                model = model.to('cuda')
-                model_out = model(**backbone_inputs, output_hidden_states=True)
+
+            model_cuda = model.to('cuda')
+            with LlamaBidirectionalSwitch(model_cuda):
+                model_out = model_cuda(**backbone_inputs, output_hidden_states=True)
                 last_token_last_hidden_state = model_out.hidden_states[:,current_token_pos,:]
         else:
             with LlamaBidirectionalSwitch(model):
