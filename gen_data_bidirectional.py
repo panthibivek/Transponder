@@ -146,10 +146,13 @@ class GenData:
             with LlamaBidirectionalSwitch(model_cuda):
                 model_out = model_cuda(**backbone_inputs, output_hidden_states=True)
                 last_token_last_hidden_state_gpu = model_out.hidden_states[-1][:,current_token_pos,:]
-                last_token_last_hidden_state = last_token_last_hidden_state_gpu.clone()
+                # last_token_last_hidden_state = last_token_last_hidden_state_gpu.clone()
+
                 del model_out
+                del last_token_last_hidden_state_gpu
                 gc.collect()
                 torch.cuda.empty_cache()
+                last_token_last_hidden_state = torch.tensor([1,2,3])
 
         else:
             with LlamaBidirectionalSwitch(model):
