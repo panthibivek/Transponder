@@ -66,8 +66,8 @@ class GenData:
             if len(prompt) < 500:
                 print(f"Current prompt number: {idx}")
                 print(f"The prompt: {prompt}")
-                last_tokens_last_hidden_state_tensor, masked_token_index_tensor, masked_token_list, updated_prompt_tensor = self.__generate_row_data(prompt, use_gpu_)
                 try:
+                    last_tokens_last_hidden_state_tensor, masked_token_index_tensor, masked_token_list, updated_prompt_tensor = self.__generate_row_data(prompt, use_gpu_)
                     try:
                         hidden_state_tensor = torch.cat((hidden_state_tensor, last_tokens_last_hidden_state_tensor), dim=0)
                         groundtruth_tensor = torch.cat((groundtruth_tensor, masked_token_index_tensor), dim=0)
@@ -97,7 +97,7 @@ class GenData:
         backbone_inputs = self.tokenizer(prompt, return_tensors="pt")
         samples_from_each_prompt = (int(backbone_inputs['input_ids'].shape[1])-self.PONDER_CONTEXT_LENGTH-1)//sampling_skip
         for idx in range(0, samples_from_each_prompt, 1):
-            if random_gen_bool(0.2):
+            if random_gen_bool(0.3):
                 if int(backbone_inputs['input_ids'].shape[1]) <= 5:
                     break
                 last_token_last_hidden_state, token_index, masked_token = self.__get_hidden_layer(
