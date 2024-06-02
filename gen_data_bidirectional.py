@@ -55,29 +55,30 @@ class GenData:
         input_df = pd.read_csv(input_data_path)
         result_df = input_df.loc[input_df['correctness'] > 3, 'prompt']
         input_prompts = list(set(result_df.tolist()))
-        input_prompts = input_prompts[:200]
+        input_prompts = input_prompts[:500]
         print(f"Total prompts: {len(input_prompts)}")
         # for dummy 
-        # input_prompts = ["I am Iron man. Am I made of iron? Wait, I think I am.", "List the top 10 tallest mountains in the world and list their locations. List the top 10 tallest mountains in the world and list their locations. List the top 10 tallest mountains in the world and list their locations."]
+        # input_prompts = ["I am Iron man. Am I made of iron? Wait, I think I am.", "List the top 10 tallest mountains in the world and list their locations."]
 
         groundtruth_token_total_list = []
         prompt_tensor = []
         for idx, prompt in enumerate(input_prompts):
-            print(f"Current prompt number: {idx}")
-            print(f"The prompt: {prompt}")
-            last_tokens_last_hidden_state_tensor, masked_token_index_tensor, masked_token_list, updated_prompt_tensor = self.__generate_row_data(prompt, use_gpu_)
-            try:
+            if len(prompt) < 500:
+                print(f"Current prompt number: {idx}")
+                print(f"The prompt: {prompt}")
+                last_tokens_last_hidden_state_tensor, masked_token_index_tensor, masked_token_list, updated_prompt_tensor = self.__generate_row_data(prompt, use_gpu_)
                 try:
-                    hidden_state_tensor = torch.cat((hidden_state_tensor, last_tokens_last_hidden_state_tensor), dim=0)
-                    groundtruth_tensor = torch.cat((groundtruth_tensor, masked_token_index_tensor), dim=0)
+                    try:
+                        hidden_state_tensor = torch.cat((hidden_state_tensor, last_tokens_last_hidden_state_tensor), dim=0)
+                        groundtruth_tensor = torch.cat((groundtruth_tensor, masked_token_index_tensor), dim=0)
+                    except:
+                        hidden_state_tensor = last_tokens_last_hidden_state_tensor
+                        groundtruth_tensor = masked_token_index_tensor
+                    groundtruth_token_total_list += masked_token_list
+                    prompt_tensor += updated_prompt_tensor
+                    print(f"Total samples generated: {len(updated_prompt_tensor)}\n")
                 except:
-                    hidden_state_tensor = last_tokens_last_hidden_state_tensor
-                    groundtruth_tensor = masked_token_index_tensor
-                groundtruth_token_total_list += masked_token_list
-                prompt_tensor += updated_prompt_tensor
-                print(f"Total samples generated: {len(updated_prompt_tensor)}\n")
-            except:
-                print(f"Prompt skipped!")
+                    print(f"Prompt skipped!")
 
         output_df = pd.DataFrame({'prompt': prompt_tensor, 'groundtruth_token': groundtruth_token_total_list})
         output_df.to_csv(f"{output_data_path}.csv", index=False)
@@ -88,7 +89,7 @@ class GenData:
         print(f"Total generated samples: {len(prompt_tensor)}")
 
     def __generate_row_data(self, prompt: str, use_gpu_:bool=False):
-        sampling_skip = 2
+        sampling_skip = 1
         masked_token_list = []
         updated_prompt_list = []
         # loop through all tokens
@@ -96,7 +97,7 @@ class GenData:
         backbone_inputs = self.tokenizer(prompt, return_tensors="pt")
         samples_from_each_prompt = (int(backbone_inputs['input_ids'].shape[1])-self.PONDER_CONTEXT_LENGTH-1)//sampling_skip
         for idx in range(0, samples_from_each_prompt, 1):
-            if random_gen_bool(0.1):
+            if random_gen_bool(0.2):
                 if int(backbone_inputs['input_ids'].shape[1]) <= 5:
                     break
                 last_token_last_hidden_state, token_index, masked_token = self.__get_hidden_layer(
