@@ -66,8 +66,8 @@ class GenData:
             if len(prompt) < 500:
                 print(f"Current prompt number: {idx}")
                 print(f"The prompt: {prompt}")
-                last_tokens_last_hidden_state_tensor, masked_token_index_tensor, masked_token_list, updated_prompt_tensor = self.__generate_row_data(prompt, use_gpu_)
                 try:
+                    last_tokens_last_hidden_state_tensor, masked_token_index_tensor, masked_token_list, updated_prompt_tensor = self.__generate_row_data(prompt, use_gpu_)
                     try:
                         hidden_state_tensor = torch.cat((hidden_state_tensor, last_tokens_last_hidden_state_tensor), dim=0)
                         groundtruth_tensor = torch.cat((groundtruth_tensor, masked_token_index_tensor), dim=0)
@@ -77,8 +77,9 @@ class GenData:
                     groundtruth_token_total_list += masked_token_list
                     prompt_tensor += updated_prompt_tensor
                     print(f"Total samples generated: {len(updated_prompt_tensor)}\n")
-                except:
+                except Exception as e:
                     print(f"Prompt skipped!")
+                    print(f"Error: {e}")
 
         output_df = pd.DataFrame({'prompt': prompt_tensor, 'groundtruth_token': groundtruth_token_total_list})
         output_df.to_csv(f"{output_data_path}.csv", index=False)
@@ -143,6 +144,7 @@ class GenData:
             model_cuda = model.to('cuda')
             with LlamaBidirectionalSwitch(model_cuda):
                 model_out = model_cuda(**backbone_inputs, output_hidden_states=True)
+                model_out.hidden_states.to('CPU')
                 last_token_last_hidden_state = model_out.hidden_states[-1][:,current_token_pos,:]
         else:
             with LlamaBidirectionalSwitch(model):
