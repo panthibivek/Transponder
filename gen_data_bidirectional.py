@@ -146,7 +146,8 @@ class GenData:
             with LlamaBidirectionalSwitch(model_cuda):
                 model_out = model_cuda(**backbone_inputs, output_hidden_states=True)
                 last_token_last_hidden_state_gpu = model_out.hidden_states[-1][:,current_token_pos,:]
-                last_token_last_hidden_state = last_token_last_hidden_state_gpu.to('cpu')
+                last_token_last_hidden_state = copy.deepcopy(last_token_last_hidden_state_gpu)
+                last_token_last_hidden_state = last_token_last_hidden_state.to('cpu')
 
                 del model_out
                 del last_token_last_hidden_state_gpu
