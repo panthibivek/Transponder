@@ -66,8 +66,8 @@ class GenData:
             if len(prompt) < 500:
                 print(f"Current prompt number: {idx}")
                 print(f"The prompt: {prompt}")
+                last_tokens_last_hidden_state_tensor, masked_token_index_tensor, masked_token_list, updated_prompt_tensor = self.__generate_row_data(prompt, use_gpu_)
                 try:
-                    last_tokens_last_hidden_state_tensor, masked_token_index_tensor, masked_token_list, updated_prompt_tensor = self.__generate_row_data(prompt, use_gpu_)
                     try:
                         hidden_state_tensor = torch.cat((hidden_state_tensor, last_tokens_last_hidden_state_tensor), dim=0)
                         groundtruth_tensor = torch.cat((groundtruth_tensor, masked_token_index_tensor), dim=0)
