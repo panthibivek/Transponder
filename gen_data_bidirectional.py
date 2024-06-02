@@ -55,7 +55,7 @@ class GenData:
         input_df = pd.read_csv(input_data_path)
         result_df = input_df.loc[input_df['correctness'] > 3, 'prompt']
         input_prompts = list(set(result_df.tolist()))
-        input_prompts = input_prompts[:500]
+        input_prompts = input_prompts[:2000]
         print(f"Total prompts: {len(input_prompts)}")
         # for dummy 
         # input_prompts = ["I am Iron man. Am I made of iron? Wait, I think I am.", "List the top 10 tallest mountains in the world and list their locations."]
