@@ -144,7 +144,7 @@ class GenData:
             model_cuda = model.to('cuda')
             with LlamaBidirectionalSwitch(model_cuda):
                 model_out = model_cuda(**backbone_inputs, output_hidden_states=True)
-                model_out.hidden_states.to('CPU')
+                model_out.hidden_states[-1].to('cpu')
                 last_token_last_hidden_state = model_out.hidden_states[-1][:,current_token_pos,:]
         else:
             with LlamaBidirectionalSwitch(model):
