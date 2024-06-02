@@ -136,6 +136,7 @@ class GenData:
         # masked_token_one_hot_encoding = torch.zeros((1, self.LLM_VOCAB_SIZE))
         # masked_token_one_hot_encoding[0][int(backbone_inputs['input_ids'][0][current_token_pos])] = 1
         token_index = torch.tensor([backbone_inputs['input_ids'][0][current_token_pos]])
+
         self.logger.debug(f"backbone_inputs = {backbone_inputs}")
 
         if use_gpu_:
@@ -143,16 +144,17 @@ class GenData:
             backbone_inputs['input_ids'] = backbone_inputs['input_ids'].to('cuda')
 
             model_cuda = model.to('cuda')
-            with LlamaBidirectionalSwitch(model_cuda):
-                model_out = model_cuda(**backbone_inputs, output_hidden_states=True)
-                last_token_last_hidden_state_gpu = model_out.hidden_states[-1][:,current_token_pos,:]
-                last_token_last_hidden_state = copy.deepcopy(last_token_last_hidden_state_gpu)
-                last_token_last_hidden_state = last_token_last_hidden_state.to('cpu')
+            with torch.no_grad():
+                with LlamaBidirectionalSwitch(model_cuda):
+                    model_out = model_cuda(**backbone_inputs, output_hidden_states=True)
+                    last_token_last_hidden_state_gpu = model_out.hidden_states[-1][:,current_token_pos,:]
+                    last_token_last_hidden_state = last_token_last_hidden_state.to('cpu')
 
-                del model_out
-                del last_token_last_hidden_state_gpu
-                gc.collect()
-                torch.cuda.empty_cache()
+                    del model_out
+                    del last_token_last_hidden_state_gpu
+                    gc.collect()
+                    torch.cuda.empty_cache()
+                    print(last_token_last_hidden_state)
 
         else:
             with LlamaBidirectionalSwitch(model):
